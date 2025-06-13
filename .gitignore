@@ -1,0 +1,5 @@
+# Python byte-code cache
+**/__pycache__/
+*.py[cod]
+# Игнорировать все логи в server/logs
+server/logs/
