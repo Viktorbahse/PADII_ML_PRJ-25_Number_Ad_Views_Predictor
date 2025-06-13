@@ -1,5 +1,21 @@
 import streamlit as st
 from api_client import set_active_model, predict_one_item, predict_csv, get_models
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
+log_dir = "logs"
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+log_file = os.path.join(log_dir, "app.log")
+handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=5)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 st.title("Прогноз доли пользователей, увидевших рекламное объявление 1,2,3 раза")
 
@@ -11,6 +27,7 @@ selected_model = st.selectbox("Выберите модель", model_names)
 if st.button("Установить модель"):
     response = set_active_model(selected_model)
     st.success(f"Модель установлена: {response['active_model']}")
+    logger.info(f"Модель установлена: {response['active_model']}")
 
 st.header("Предсказание для рекламного объявления")
 cpm = st.number_input("CPM", min_value=0.0, value=250.0)
@@ -31,6 +48,7 @@ if st.button("Предсказать"):
     }
     prediction = predict_one_item(data)
     st.success(f"Предсказания: {prediction}")
+    logger.info(f"Предсказания: {prediction}")
 
 st.header("Предсказание из CSV")
 uploaded_file = st.file_uploader("Выберите CSV файл", type=["csv"])
@@ -40,6 +58,8 @@ if st.button("Предсказать для датасета"):
         response = predict_csv(uploaded_file)
         if response.status_code == 200:
             st.success("Предсказания готовы!")
+            logger.info(f"Предсказания готовы!")
             st.download_button("Скачать предсказания", response.content, "predictions.csv")
         else:
             st.error("Ошибка при получении предсказаний.")
+            logger.error(f"Ошибка при получении предсказаний")
