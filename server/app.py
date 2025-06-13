@@ -98,7 +98,7 @@ async def predict_csv(
     logger.info("Запрос на предсказание просмотров из CSV-файла.")
 
     if app.state.active_model is None:
-        logger.error("Попытание предсказания без установленной активной модели.")
+        logger.error("Попытка предсказания без установленной активной модели.")
         raise HTTPException(
             status_code=400,
             detail="Активная модель не установлена. Пожалуйста, установите модель через /set."
