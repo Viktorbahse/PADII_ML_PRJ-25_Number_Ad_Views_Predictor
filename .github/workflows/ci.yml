@@ -2,9 +2,9 @@ name: CI for ML Service
 
 on:
   push:
-    branches: [ main, dockerized-service, integrated-service ]
+    branches: [ main,  integrated-service ]
   pull_request:
-    branches: [ main, dockerized-service, integrated-service ]
+    branches: [ main, integrated-service ]
 
 jobs:
   test-backend:
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.10
 
       - name: Install dependencies
         run: |
