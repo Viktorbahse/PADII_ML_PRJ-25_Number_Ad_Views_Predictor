@@ -1,29 +1,33 @@
 import pytest
 from fastapi.testclient import TestClient
 from app import app
+from classes import DummyModelFirst, DummyModelSecond
 import io
 import pandas as pd
 
-client = TestClient(app)
+app.state.models = {
+    "DummyModelFirst": DummyModelFirst(),
+    "DummyModelSecond": DummyModelSecond()
+}
+app.state.active_model = None
 
+client = TestClient(app)
 
 def test_get_models():
     response = client.get("/models")
     assert response.status_code == 200
     assert "models" in response.json()
-
+    assert "DummyModelFirst" in response.json()["models"]
 
 def test_set_valid_model():
     response = client.post("/set/DummyModelFirst")
     assert response.status_code == 200
     assert response.json()["active_model"] == "DummyModelFirst"
 
-
 def test_set_invalid_model():
     response = client.post("/set/NonExistentModel")
     assert response.status_code == 400
     assert "не найдена" in response.json()["detail"]
-
 
 def test_predict_valid_input():
     client.post("/set/DummyModelFirst")
@@ -41,7 +45,6 @@ def test_predict_valid_input():
     for key in ["at_least_one", "at_least_two", "at_least_three"]:
         assert key in result
 
-
 def test_predict_missing_model():
     app.state.active_model = None
     payload = {
@@ -55,7 +58,6 @@ def test_predict_missing_model():
     response = client.post("/predict", json=payload)
     assert response.status_code == 400
     assert "не установлена" in response.json()["detail"]
-
 
 def test_predict_csv():
     client.post("/set/DummyModelFirst")
