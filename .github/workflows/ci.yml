@@ -28,4 +28,5 @@ jobs:
           pip install pytest
 
       - name: Run backend tests
-        run: pytest tests/
+        run: PYTHONPATH=. pytest tests/
+
