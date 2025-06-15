@@ -22,17 +22,19 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
-st.title("Прогноз доли пользователей, увидевших рекламное объявление 1, 2, 3 раза")
+st.title("Выберите модель")
 
 models = get_models()
 model_names = list(models['models'].keys())
 
-selected_model = st.selectbox("Выберите модель", model_names)
+selected_model = st.selectbox("Модель", model_names)
 
 if st.button("Установить модель"):
     response = set_active_model(selected_model)
     st.success(f"Модель установлена: {response['active_model']}")
     logger.info(f"Модель установлена: {response['active_model']}")
+
+st.title("Прогноз доли пользователей, увидевших рекламное объявление 1, 2, 3 раза")
 
 def validate_input(input_string):
     pattern = r'^\d+(,\d+)*$'
@@ -330,3 +332,112 @@ if not st.session_state.users_df.empty and not st.session_state.history_df.empty
             st.write(analysis['cpm_distribution'])
         else:
             st.warning("Пользователь не найден")
+
+def binary_search(hour_start, hour_end, publishers, audience_size, user_ids, target):
+    left = 0
+    right = 10000000
+    ans = -1
+    while left < right:
+        mid = (left + right) // 2  
+        data = {
+            "cpm": mid,
+            "hour_start": hour_start,
+            "hour_end": hour_end,
+            "publishers": publishers,
+            "audience_size": audience_size,
+            "user_ids": user_ids
+        }
+
+        prediction = predict_one_item(data)
+        st.success(f"Предсказания: {prediction}")
+        logger.info(f"Предсказания: {prediction}")
+
+        auditorium = audience_size*(prediction['at_least_one']+prediction['at_least_two']+prediction['at_least_three'])
+        if target > auditorium:
+            left = mid + 1
+        else:
+            right = mid
+    return right    
+
+def budget_calculator():
+    st.title("Калькулятор бюджета")
+    
+    st.header("Желаемое количество просмотров")
+    target_views = st.number_input(
+        "Введите количество просмотров:", 
+        min_value=0, 
+        max_value=10000000, 
+        value=10_000,
+        step=10
+    )
+
+    st.header("Период показа объявления")
+    target_duration = st.number_input("Продолжительность", min_value=0, max_value=300, value = 50, step=1)
+    
+    st.header("Выбор площадок")
+    select_all = st.checkbox("Выбрать все площадки", key="select_all")
+    cols = st.columns(3)
+    selected_platforms = []
+    for i in range(1, 22):
+        with cols[(i-1)//7]:
+            if select_all:
+                checked = st.checkbox(f"Площадка {i}", value=True, key=f"platform_{i}")
+            else:
+                checked = st.checkbox(f"Площадка {i}", key=f"platform_{i}")
+            
+            if checked:
+                selected_platforms.append(i)
+    
+    st.header("Аудитория")
+    uploaded_file = st.file_uploader(
+        "Загрузите CSV/TSV файл с user_id (обязательно)", 
+        type=["csv", "tsv", "txt"],  
+        help="Файл должен содержать столбец 'user_id'. Разделитель: запятая (CSV) или табуляция (TSV)"
+    )
+
+    if uploaded_file:
+        try:
+            if uploaded_file.name.endswith('.csv'):
+                df_users = pd.read_csv(uploaded_file, sep='\t')
+            else:  
+                df_users = pd.read_csv(uploaded_file, sep='\t')
+            
+            if "user_id" not in df_users.columns:
+                print(df_users.columns)
+                st.error("❌ В файле нет столбца 'user_id'!")
+            else:
+                st.success(f"✅ Файл загружен. Найдено {len(df_users)} пользователей")
+                st.dataframe(df_users.head(3))  
+            
+        except Exception as e:
+            st.error(f"❌ Ошибка чтения файла: {str(e)}")
+    
+    if st.button("Рассчитать бюджет", type="primary"):
+        if not selected_platforms:
+            st.warning("Выберите хотя бы одну площадку!")
+        if not uploaded_file:
+            st.warning("ℹ️ Загрузите CSV файл, чтобы начать расчет")  
+        else:
+            user_ids_str = ",".join(df_users["user_id"].astype(str))
+            publishers_str = ",".join(map(str, selected_platforms))
+
+            cost_per_view = binary_search(1, target_duration, publishers_str, df_users.shape[0], publishers_str, target_views)
+            total_cost = (target_views / 1000) * cost_per_view
+            if cost_per_view == 10000000:
+                st.success(f"""
+                ### Результаты расчета:
+                - **Желаемое количество просмотров:** {target_views:,}
+                - **Выбранные площадки:** {sorted(selected_platforms)}
+                - **Расчетный бюджет:** более ${total_cost:,.2f} USD
+                - **CPM:** более ${cost_per_view} USD
+                """)
+            else:
+                st.success(f"""
+                ### Результаты расчета:
+                - **Желаемое количество просмотров:** {target_views:,}
+                - **Выбранные площадки:** {sorted(selected_platforms)}
+                - **Расчетный бюджет:** ${total_cost:,.2f} USD
+                - **CPM:** ${cost_per_view} USD
+                """)
+
+budget_calculator()
