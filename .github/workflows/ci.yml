@@ -2,16 +2,16 @@ name: CI for ML Service
 
 on:
   push:
-    branches: [ main ]
+    branches: [ integrated-service ]
   pull_request:
-    branches: [ main ]
+    branches: [ integrated-service ]
 
 jobs:
   test-backend:
     runs-on: ubuntu-latest
     defaults:
-        run: pip install -r server/requirements.txt
-        run: pytest server/tests/
+      run:
+        working-directory: server
 
     steps:
       - name: Checkout repository
