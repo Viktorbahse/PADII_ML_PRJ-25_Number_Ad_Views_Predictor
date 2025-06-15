@@ -349,7 +349,6 @@ def binary_search(hour_start, hour_end, publishers, audience_size, user_ids, tar
         }
 
         prediction = predict_one_item(data)
-        st.success(f"Предсказания: {prediction}")
         logger.info(f"Предсказания: {prediction}")
 
         auditorium = audience_size*(prediction['at_least_one']+prediction['at_least_two']+prediction['at_least_three'])
