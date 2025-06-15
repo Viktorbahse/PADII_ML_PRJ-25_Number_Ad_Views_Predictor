@@ -5,13 +5,32 @@ from classes import DummyModelFirst, DummyModelSecond
 import io
 import pandas as pd
 
+X_train = pd.DataFrame([{
+    "cpm": 100,
+    "hour_start": 0,
+    "hour_end": 100,
+    "publishers": "1,2,3",
+    "audience_size": 5,
+    "user_ids": "10,11"
+}])
+
+y_train = pd.DataFrame([{
+    "at_least_one": 0.6,
+    "at_least_two": 0.3,
+    "at_least_three": 0.1
+}])
+
+model = DummyModelFirst()
+model.fit(X_train, y_train)
+
 app.state.models = {
-    "DummyModelFirst": DummyModelFirst(),
+    "DummyModelFirst": model,
     "DummyModelSecond": DummyModelSecond()
 }
 app.state.active_model = None
 
 client = TestClient(app)
+
 
 def test_get_models():
     response = client.get("/models")
@@ -19,15 +38,18 @@ def test_get_models():
     assert "models" in response.json()
     assert "DummyModelFirst" in response.json()["models"]
 
+
 def test_set_valid_model():
     response = client.post("/set/DummyModelFirst")
     assert response.status_code == 200
     assert response.json()["active_model"] == "DummyModelFirst"
 
+
 def test_set_invalid_model():
     response = client.post("/set/NonExistentModel")
     assert response.status_code == 400
     assert "не найдена" in response.json()["detail"]
+
 
 def test_predict_valid_input():
     client.post("/set/DummyModelFirst")
@@ -39,11 +61,12 @@ def test_predict_valid_input():
         "audience_size": 10,
         "user_ids": "101,102,103"
     }
-    response = client.post("/predict", json=payload)
+    response = client.post("/predict_one_item", json=payload)
     assert response.status_code == 200
     result = response.json()
     for key in ["at_least_one", "at_least_two", "at_least_three"]:
         assert key in result
+
 
 def test_predict_missing_model():
     app.state.active_model = None
@@ -55,9 +78,10 @@ def test_predict_missing_model():
         "audience_size": 10,
         "user_ids": "101,102,103"
     }
-    response = client.post("/predict", json=payload)
+    response = client.post("/predict_one_item", json=payload)
     assert response.status_code == 400
     assert "не установлена" in response.json()["detail"]
+
 
 def test_predict_csv():
     client.post("/set/DummyModelFirst")
