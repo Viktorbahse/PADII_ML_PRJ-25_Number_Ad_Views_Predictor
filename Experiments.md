@@ -8,7 +8,7 @@ $$ 100\% \cdot \left( \exp \left( \frac{1}{n} \sum_{i=1}^{n}\left|\log\left(\fra
 
 $\epsilon = 0.005$
 
-![metric formula](metric.png "формула в виде картинки")
+![](images/metric.png)
 
 EPS = 0.005
 
