@@ -2,11 +2,27 @@
 Есть несколько вариантов запустить сервис:
 - собрать docker-образ по инструкции в README.md
 - запустить dev-версию проекта локально
-    - склонируйте репозитроий и перейдите в директорию `web_app`
-    - установите зависимости: `pip install -r client/requirements.txt -r server/requirements.txt` 
-    - в командной строке пропишите `pip install -e .`
-    - двумя отдельными процессами запустите сервер (`cd server && fastapi run app.py`) и клиент (`cd client && streamlit run app.py`)
-
+    1) склонируйте репозитроий и перейдите в директорию `web_app`
+    2) установите зависимости для сервера:
+      ```bash
+  cd server
+  pip install -r requirements.txt
+   ```
+    3) установите зависимости для клиента:
+       ```bash
+  cd client
+  pip install -r requirements.txt
+   ```
+    4) запустите сервер (FastAPI):
+       ```bash
+  cd server
+  uvicorn app:app --reload --host --port 8000
+   ```
+    5) запустите веб-сервис (Streamlit):
+        ```bash
+  cd client
+  streamlit run app.py
+   ```
 # Класс `APIClient`
 
 ## Описание
