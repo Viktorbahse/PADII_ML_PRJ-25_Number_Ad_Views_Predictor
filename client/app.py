@@ -22,7 +22,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
+
 st.title("Выберите модель")
+
 
 models = get_models()
 model_names = list(models['models'].keys())
@@ -440,3 +442,4 @@ def budget_calculator():
                 """)
 
 budget_calculator()
+

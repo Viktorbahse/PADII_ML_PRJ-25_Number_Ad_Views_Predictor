@@ -1,5 +1,7 @@
-streamlit
+streamlit==1.30.0
 pydantic
 requests
-wandb
-plotly
+wandb==0.15.0
+plotly==5.20.0
+matplotlib
+seaborn
