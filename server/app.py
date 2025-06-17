@@ -34,6 +34,7 @@ async def lifespan(app: FastAPI):
     import sys
     sys.modules['__main__'].DummyModelFirst = DummyModelFirst
     sys.modules['__main__'].DummyModelSecond = DummyModelSecond
+    sys.modules['__main__'].MyPredictor = MyPredictor
 
     app.state.models = {}
     app.state.active_model = None
