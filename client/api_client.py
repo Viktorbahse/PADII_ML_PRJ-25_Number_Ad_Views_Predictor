@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
-BASE_URL = "http://backend:8000"
+BASE_URL = "http://localhost:8000"
 
 def set_active_model(model_name: str):
     logger.info(f"Установить модель: {model_name}")
