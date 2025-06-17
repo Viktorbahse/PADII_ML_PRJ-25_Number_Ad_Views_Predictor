@@ -1,34 +1,38 @@
 # Запуск сервиса
 Есть несколько вариантов запустить сервис:
 
+Есть несколько вариантов запустить сервис:
+
 1. Собрать docker-образ по инструкции в `README.md`
+
 2. Запустить dev-версию проекта локально:
 
-  1. Склонируйте репозиторий и перейдите в корень проекта.
+   1. Склонируйте репозиторий и перейдите в корень проекта.
 
-  2. Установите зависимости для сервера:
-     ```bash
-     cd server
-     pip install -r requirements.txt
-     ```
+   2. Установите зависимости для сервера:
+      ```bash
+      cd server
+      pip install -r requirements.txt
+      ```
 
-  3. Установите зависимости для клиента:
-     ```bash
-     cd client
-     pip install -r requirements.txt
-     ```
+   3. Установите зависимости для клиента:
+      ```bash
+      cd client
+      pip install -r requirements.txt
+      ```
 
-  4. Запустите сервер (FastAPI):
-     ```bash
-     cd server
-     uvicorn app:app --reload --host 0.0.0.0 --port 8000
-     ```
+   4. Запустите сервер (FastAPI):
+      ```bash
+      cd server
+      uvicorn app:app --reload --host 0.0.0.0 --port 8000
+      ```
 
-  5. Запустите веб-сервис (Streamlit):
-     ```bash
-     cd client
-     streamlit run app.py
-     ```
+   5. Запустите веб-сервис (Streamlit):
+      ```bash
+      cd client
+      streamlit run app.py
+      ```
+
 
 # Класс `APIClient`
 
